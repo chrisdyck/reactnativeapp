@@ -25,4 +25,4 @@ const styles = StyleSheet.create({
   }
 });
 
-AppRegistry.registerComponent("FirstApp", () => Greeting);
+AppRegistry.registerComponent("Greeting", () => Greeting);
