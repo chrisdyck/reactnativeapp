@@ -1,37 +1,63 @@
 import React, { Component } from "react"; // import React and Component from react library
-import { AppRegistry, FlatList, StyleSheet, Text, View } from "react-native"; // import Text Component from react-native library
-// var users = require("../../data/users.json");
-import users from "../../data/users.json";
-
-// Build a local list of Users
-// const users = [
-//   { key: "1", name: "Chris" },
-//   { key: "2", name: "John" },
-//   { key: "3", name: "Jane" },
-//   { key: "4", name: "Jimmy" },
-//   { key: "5", name: "Kim" },
-//   { key: "6", name: "Jill" },
-//   { key: "7", name: "Jake" },
-//   { key: "8", name: "Izaac" }
-// ];
+import {
+  AppRegistry,
+  FlatList,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View
+} from "react-native"; // import Text Component from react-native library
 
 // Declare a Component named Users
 export default class Users extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      usersLocal: users
+      isLoading: true,
+      usersURL:
+        this.props.usersURL == ""
+          ? "https://jsonplaceholder.typicode.com/users"
+          : this.props.usersURL
     };
   }
 
+  // Use the componentDidMount function to acquire data from a URL
+  componentDidMount() {
+    return fetch(this.state.usersURL)
+      .then(response => response.json())
+      .then(responseJson => {
+        this.setState(
+          {
+            isLoading: false,
+            users: responseJson
+          },
+          function() {}
+        );
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  // The data structure contains a key named 'id'
+  // here we tell the FlatList the key property
+  // we need to convert the id to a String from a number
   _keyExtractor = (item, index) => String(item.id);
 
   render() {
+    if (this.state.isLoading) {
+      return (
+        <View style={{ flex: 1, padding: 20 }}>
+          <ActivityIndicator />
+        </View>
+      );
+    }
+
     // Render a FlatList Component with the array of users stored in usersLocal
     return (
       <View style={styles.container}>
         <FlatList
-          data={this.state.usersLocal}
+          data={this.state.users}
           keyExtractor={this._keyExtractor}
           renderItem={({ item }) => (
             <View>
