@@ -5,25 +5,20 @@ import {
   ActivityIndicator,
   StyleSheet,
   Text,
-  View
+  View,
+  TouchableHighlight
 } from "react-native"; // import Text Component from react-native library
 
 // Declare a Component named Users
 export default class Users extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      isLoading: true,
-      usersURL:
-        this.props.usersURL == ""
-          ? "https://jsonplaceholder.typicode.com/users"
-          : this.props.usersURL
-    };
+
+    this.state = { isLoading: true };
   }
 
-  // Use the componentDidMount function to acquire data from a URL
-  componentDidMount() {
-    return fetch(this.state.usersURL)
+  getUsers() {
+    return fetch(this.props.usersURL)
       .then(response => response.json())
       .then(responseJson => {
         this.setState(
@@ -39,11 +34,30 @@ export default class Users extends Component {
       });
   }
 
+  // Use the componentDidMount function to acquire data from a URL
+  componentDidMount() {
+    return this.getUsers();
+  }
+
   // The data structure contains a key named 'id'
   // here we tell the FlatList the key property
   // we need to convert the id to a String from a number
   _keyExtractor = (item, index) => String(item.id);
 
+  // Handle the onPress event from a list item
+  // Simply display an alert with the name property
+  _onPress = item => {
+    this.props.navigation.navigate("UserDetails", { user: item });
+  };
+
+  _renderItem = ({ item }) => (
+    <TouchableHighlight onPress={() => this._onPress(item)}>
+      <View>
+        <Text style={styles.item}>{item.name}</Text>
+        <Text style={styles.itemsub}>{item.email}</Text>
+      </View>
+    </TouchableHighlight>
+  );
   render() {
     if (this.state.isLoading) {
       return (
@@ -59,12 +73,7 @@ export default class Users extends Component {
         <FlatList
           data={this.state.users}
           keyExtractor={this._keyExtractor}
-          renderItem={({ item }) => (
-            <View>
-              <Text style={styles.item}>{item.name}</Text>
-              <Text style={styles.itemsub}>{item.email}</Text>
-            </View>
-          )}
+          renderItem={this._renderItem}
         />
       </View>
     );
